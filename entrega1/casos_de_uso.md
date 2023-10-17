@@ -108,3 +108,50 @@ Neste caso de uso, um musicista acessa a área do sistema onde pode gerar relat�
 3. O sistema gera um arquivo que lista todos os rendimentos registrados para o musicista no mês.
 4. O arquivo mostra todos os cálculos, incluindo descontos (valor para o Ecad e associação), que levaram ao valor final.
 
+## Use Case 6: Acompanhar em série histórica os recebimentos do artista
+
+**Actor:**
+Musicista
+
+**Summary Description:**
+Neste caso de uso, um musicista tem a capacidade de acompanhar em série histórica os recebimentos ao longo de um período escolhido. O musicista seleciona as datas de início e fim para visualizar os rendimentos desse período. O sistema retorna uma visualização com todos os rendimentos e o somatório de rendimentos, incluindo cálculos de descontos (valor para o Ecad e associação), até o valor final recebido nesse período. Além disso, o musicista tem a opção de filtrar os rendimentos por cidade, estado e música.
+
+**Pre-Condition:**
+- O musicista tem acesso à funcionalidade de acompanhamento de série histórica de recebimentos.
+
+**Post-Condition:**
+- O musicista obtém uma visualização detalhada dos rendimentos, incluindo o somatório, para o período especificado.
+
+**Basic Path:**
+1. O musicista escolhe as datas de início e fim do período que deseja ver os rendimentos.
+2. O sistema retorna uma visualização com todos os rendimentos para o período especificado.
+3. O sistema calcula o somatório dos rendimentos, incluindo cálculos de descontos (valor para o Ecad e associação), até o valor final recebido nesse período.
+4. O musicista tem a opção de filtrar os rendimentos por cidade, estado e música.
+
+**Use Case 7:** Pedir Adiantamento à Associação
+
+**Actor:** Musicista
+
+**Summary Description:** O musicista deseja solicitar um adiantamento financeiro à sua associação de compositores por meio do sistema.
+
+**Pre-Condition:**
+- O musicista está autenticado no sistema.
+- A associação à qual o musicista está afiliado aceita pedidos de adiantamento.
+- O valor máximo que pode ser solicitado como adiantamento foi previamente definido.
+
+**Post-Condition:**
+- O adiantamento é aprovado ou rejeitado.
+- Caso seja aprovado, o montante solicitado será descontado dos futuros rendimentos do musicista.
+
+**Basic Path:**
+1. O musicista faz login no sistema.
+2. O musicista acessa a opção de solicitar adiantamento.
+3. O sistema exibe o valor máximo que pode ser solicitado com base nos últimos 6 meses.
+4. O musicista escolhe o valor que deseja adiantar, dentro dos limites estabelecidos.
+5. O musicista envia a solicitação de adiantamento à sua associação.
+6. A associação analisa a solicitação.
+7. Se a solicitação for aprovada:
+   a. Os futuros rendimentos do musicista terão o valor do adiantamento descontado.
+   b. Se o valor do adiantamento ultrapassar os rendimentos do mês, o musicista não receberá rendimentos, e um aviso de saldo devedor à associação será gerado.
+   c. O valor do adiantamento não pago será descontado integralmente nos próximos meses até que a dívida seja quitada.
+8. Se a solicitação for rejeitada, o musicista solicitante recebe um aviso de rejeição.
