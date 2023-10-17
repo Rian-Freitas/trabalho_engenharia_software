@@ -1,4 +1,4 @@
-## Caso de Uso 1: Login
+## Use Case 1: Login
 
 **Ator Principal:**
 Usuário do Sistema (Proprietário de Estabelecimento, Músico ou Representante de Associação)
@@ -128,7 +128,7 @@ Neste caso de uso, um musicista tem a capacidade de acompanhar em série histór
 3. O sistema calcula o somatório dos rendimentos, incluindo cálculos de descontos (valor para o Ecad e associação), até o valor final recebido nesse período.
 4. O musicista tem a opção de filtrar os rendimentos por cidade, estado e música.
 
-**Use Case 7:** Pedir Adiantamento à Associação
+## Use Case 7: Pedir Adiantamento à Associação
 
 **Actor:** Musicista
 
@@ -156,7 +156,7 @@ Neste caso de uso, um musicista tem a capacidade de acompanhar em série histór
    c. O valor do adiantamento não pago será descontado integralmente nos próximos meses até que a dívida seja quitada.
 8. Se a solicitação for rejeitada, o musicista solicitante recebe um aviso de rejeição.
 
-**Use Case 8:** Pedir para Musicista Trocar de Associação
+## Use Case 8: Pedir para Musicista Trocar de Associação
 
 **Actor:** Musicista
 
@@ -181,7 +181,7 @@ Neste caso de uso, um musicista tem a capacidade de acompanhar em série histór
    b. Os relatórios futuros terão seu somatório calculado com a porcentagem de desconto da nova associação.
 7. Se uma ou ambas as solicitações forem rejeitadas, o musicista solicitante recebe um aviso de rejeição.
 
-**Use Case 9:** Acompanhar Fluxo de Turnover dos Artistas de uma Associação
+## Use Case 9: Acompanhar Fluxo de Turnover dos Artistas de uma Associação
 
 **Actor:** Representante da Associação
 
@@ -201,3 +201,26 @@ Neste caso de uso, um musicista tem a capacidade de acompanhar em série histór
 4. O sistema gera um gráfico exibindo o número de saídas de associados em cada mês dentro do período selecionado.
 5. O sistema fornece informações sobre as associações para as quais os associados saídos migraram.
 6. O sistema apresenta o total de associados que se desligaram da associação no período.
+
+## Use Case 10: Acompanhar Rendimentos em Série Histórica dos Artistas Membros de uma Associação
+
+**Actor:** Representante da Associação
+
+**Summary Description:** O representante da associação deseja acompanhar os rendimentos dos artistas membros ao longo de um período específico, com a possibilidade de aplicar filtros.
+
+**Pre-Condition:**
+- O representante da associação está autenticado no sistema.
+- A opção de acompanhamento de rendimentos em série histórica está disponível.
+
+**Post-Condition:**
+- O representante obtém uma visualização detalhada dos rendimentos dos artistas membros, incluindo somatórios com cálculos de descontos.
+
+**Basic Path:**
+1. O representante da associação faz login no sistema.
+2. O representante seleciona a opção de acompanhar rendimentos em série histórica.
+3. O representante escolhe um período, especificando a data de início e fim da análise.
+4. O sistema gera uma visualização com todos os rendimentos dos artistas membros nesse período.
+5. O sistema calcula os somatórios dos rendimentos com todos os cálculos de descontos (para o Ecad e a associação).
+6. O representante pode aplicar filtros por cidade, estado, musicista e música para analisar dados específicos.
+
+
