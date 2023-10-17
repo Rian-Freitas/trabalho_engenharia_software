@@ -39,3 +39,33 @@ Como músico afiliado a uma associação de compositores, desejo solicitar um ad
 - Se aprovada, o valor do adiantamento será descontado dos rendimentos futuros do músico.
 - Se o adiantamento ultrapassar os rendimentos de um mês, o músico não receberá rendimentos naquele mês e será notificado sobre o saldo devedor à associação.
 - O valor do adiantamento não pago será descontado nos meses subsequentes até que a dívida seja quitada.
+
+**Estória de Usuário 8: Pedir para Musicista Trocar de Associação**
+
+**Nome da Estória de Usuário:** Solicitar Troca de Associação
+
+**Descrição:**
+Como músico afiliado a uma associação de compositores, desejo solicitar a troca de associação para me unir a uma associação diferente. Isso me permitirá explorar novas oportunidades e benefícios oferecidos por outra associação.
+
+**Critérios de Aceitação:**
+- O sistema deve permitir que o músico acesse a função de solicitar a troca de associação.
+- O músico deve escolher a associação para a qual deseja trocar.
+- Duas solicitações devem ser enviadas: uma para a liberação da saída da associação atual e outra para a entrada na nova associação.
+- Ambas as associações envolvidas devem analisar e aprovar ou rejeitar as solicitações.
+- Se ambas as solicitações forem aprovadas, o músico muda de associação.
+- Os relatórios futuros do músico terão seu somatório calculado com a porcentagem de desconto da nova associação.
+- Se uma ou ambas as solicitações forem rejeitadas, o músico solicitante será notificado sobre a rejeição.
+
+**Estória de Usuário 9: Acompanhar Fluxo de Turnover dos Artistas de uma Associação**
+
+**Nome da Estória de Usuário:** Acompanhar Saídas de Associados
+
+**Descrição:**
+Como representante de uma associação de compositores, desejo acompanhar o fluxo de saída de associados durante um período específico para entender o turnover. Isso me permitirá tomar decisões informadas sobre o engajamento dos associados e atração de novos membros.
+
+**Critérios de Aceitação:**
+- O sistema deve permitir que o representante da associação acesse a função de acompanhamento do fluxo de saída.
+- O representante deve escolher um período, especificando a data de início e fim da análise.
+- O sistema deve gerar um gráfico exibindo o número de saídas de associados em cada mês dentro do período selecionado.
+- O sistema deve fornecer informações sobre as associações para as quais os associados saídos migraram.
+- O sistema deve apresentar o total de associados que se desligaram da associação no período.

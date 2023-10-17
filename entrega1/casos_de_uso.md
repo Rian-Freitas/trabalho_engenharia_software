@@ -155,3 +155,49 @@ Neste caso de uso, um musicista tem a capacidade de acompanhar em série histór
    b. Se o valor do adiantamento ultrapassar os rendimentos do mês, o musicista não receberá rendimentos, e um aviso de saldo devedor à associação será gerado.
    c. O valor do adiantamento não pago será descontado integralmente nos próximos meses até que a dívida seja quitada.
 8. Se a solicitação for rejeitada, o musicista solicitante recebe um aviso de rejeição.
+
+**Use Case 8:** Pedir para Musicista Trocar de Associação
+
+**Actor:** Musicista
+
+**Summary Description:** O musicista deseja solicitar a troca de associação para outra no sistema.
+
+**Pre-Condition:**
+- O musicista está autenticado no sistema.
+- O musicista deseja mudar de associação.
+- A solicitação de troca de associação é permitida.
+
+**Post-Condition:**
+- A troca de associação é aprovada ou rejeitada, afetando os relatórios futuros do musicista.
+
+**Basic Path:**
+1. O musicista faz login no sistema.
+2. O musicista acessa a opção de solicitar a troca de associação.
+3. O musicista seleciona a associação para a qual deseja trocar.
+4. Duas solicitações são enviadas: uma para a liberação da saída da associação atual e outra para a entrada na nova associação.
+5. Ambas as associações analisam as solicitações.
+6. Se ambas as solicitações forem aprovadas:
+   a. O musicista muda de associação.
+   b. Os relatórios futuros terão seu somatório calculado com a porcentagem de desconto da nova associação.
+7. Se uma ou ambas as solicitações forem rejeitadas, o musicista solicitante recebe um aviso de rejeição.
+
+**Use Case 9:** Acompanhar Fluxo de Turnover dos Artistas de uma Associação
+
+**Actor:** Representante da Associação
+
+**Summary Description:** O representante da associação deseja acompanhar o fluxo de saída de associados ao longo de um período específico.
+
+**Pre-Condition:**
+- O representante da associação está autenticado no sistema.
+- A opção de acompanhamento do fluxo de turnover está disponível.
+
+**Post-Condition:**
+- O representante obtém informações sobre o número de saídas de associados, as associações para as quais eles migraram e o total de associados desligados.
+
+**Basic Path:**
+1. O representante da associação faz login no sistema.
+2. O representante seleciona a opção de acompanhar o fluxo de turnover.
+3. O representante escolhe um período, especificando a data de início e fim da análise.
+4. O sistema gera um gráfico exibindo o número de saídas de associados em cada mês dentro do período selecionado.
+5. O sistema fornece informações sobre as associações para as quais os associados saídos migraram.
+6. O sistema apresenta o total de associados que se desligaram da associação no período.
