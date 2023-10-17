@@ -23,7 +23,7 @@
 *Como* **musicista**, **quero** ser capaz de *acompanhar em série histórica* os meus *recebimentos* ao longo do tempo, **para** ter uma visão clara e detalhada dos meus ganhos em períodos específicos.
 
 
-**Estória de Usuário 7: Pedir Adiantamento à Associação**
+## Estória de Usuário 7: Pedir Adiantamento à Associação**
 
 **Nome da Estória de Usuário:** Solicitar Adiantamento de Rendimentos
 
