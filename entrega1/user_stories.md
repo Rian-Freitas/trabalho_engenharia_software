@@ -40,7 +40,7 @@ Como músico afiliado a uma associação de compositores, desejo solicitar um ad
 - Se o adiantamento ultrapassar os rendimentos de um mês, o músico não receberá rendimentos naquele mês e será notificado sobre o saldo devedor à associação.
 - O valor do adiantamento não pago será descontado nos meses subsequentes até que a dívida seja quitada.
 
-**Estória de Usuário 8: Pedir para Musicista Trocar de Associação**
+## Estória de Usuário 8: Pedir para Musicista Trocar de Associação
 
 **Nome da Estória de Usuário:** Solicitar Troca de Associação
 
@@ -56,7 +56,7 @@ Como músico afiliado a uma associação de compositores, desejo solicitar a tro
 - Os relatórios futuros do músico terão seu somatório calculado com a porcentagem de desconto da nova associação.
 - Se uma ou ambas as solicitações forem rejeitadas, o músico solicitante será notificado sobre a rejeição.
 
-**Estória de Usuário 9: Acompanhar Fluxo de Turnover dos Artistas de uma Associação**
+## Estória de Usuário 9: Acompanhar Fluxo de Turnover dos Artistas de uma Associação**
 
 **Nome da Estória de Usuário:** Acompanhar Saídas de Associados
 
@@ -69,3 +69,19 @@ Como representante de uma associação de compositores, desejo acompanhar o flux
 - O sistema deve gerar um gráfico exibindo o número de saídas de associados em cada mês dentro do período selecionado.
 - O sistema deve fornecer informações sobre as associações para as quais os associados saídos migraram.
 - O sistema deve apresentar o total de associados que se desligaram da associação no período.
+
+## Estória de Usuário 10: Acompanhar Rendimentos em Série Histórica dos Artistas Membros de uma Associação
+
+**Nome da Estória de Usuário:** Acompanhar Rendimentos Históricos
+
+**Descrição:**
+Como representante de uma associação de compositores, desejo acompanhar os rendimentos dos artistas membros ao longo de um período específico, com a capacidade de aplicar filtros para análise detalhada. Isso me permitirá avaliar o desempenho dos membros e tomar decisões informadas.
+
+**Critérios de Aceitação:**
+- O sistema deve permitir que o representante da associação acesse a função de acompanhamento de rendimentos em série histórica.
+- O representante deve escolher um período, especificando a data de início e fim da análise.
+- O sistema deve gerar uma visualização com todos os rendimentos dos artistas membros nesse período.
+- O sistema deve calcular os somatórios dos rendimentos com todos os cálculos de descontos (para o Ecad e a associação).
+- O representante deve poder aplicar filtros por cidade, estado, musicista e música para analisar dados
+
+
