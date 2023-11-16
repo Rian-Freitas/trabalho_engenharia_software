@@ -1,16 +1,21 @@
 import re
 
 cpf_fornecido = input("Formato para inserir CPF - XXX.XXX.XXX-XX: ")
+
+############################################# PARTE 1 #############################################
 cpf_tratado = re.sub(r"[^0-9]", "", cpf_fornecido)
 
+############################################# PARTE 2 #############################################
 if cpf_tratado == cpf_tratado[0] * len(cpf_tratado):
     print("CPF inválido")
 else:
+
+############################################# PARTE 3 #############################################
     cpf_sem_digitos_verificadores = cpf_tratado[:9]
     nr_digitos = 10
-   
     digito_calculado = 0
    
+############################################# PARTE 4 #############################################
     for cada_digito in cpf_sem_digitos_verificadores:
         digito_calculado += int(cada_digito) * nr_digitos
         nr_digitos -= 1
@@ -23,8 +28,9 @@ else:
         digito_verificador_1 = 0
    
     cpf_com_um_digito_verificador = cpf_sem_digitos_verificadores + str(digito_verificador_1)
+    
+############################################# PARTE 5 #############################################    
     nr_digitos = 11
-   
     digito_calculado = 0
    
     for cada_digito in cpf_com_um_digito_verificador:
@@ -38,6 +44,7 @@ else:
     else:
         digito_verificador_2 = 0
    
+############################################# PARTE 6 #############################################
     if (int(cpf_tratado[9]) == digito_verificador_1) and (int(cpf_tratado[10]) == digito_verificador_2):
         print("CPF é válido")
     else:
