@@ -17,15 +17,19 @@ class Login:
         self.img = PhotoImage(file=os.path.join(os.path.dirname(__file__), r"figs\Nova_logomarca_do_Ecad.png")).subsample(4,4)
         self.lbl_img = Label(self.root, image=self.img, bg="#f7f7f2")
         self.lbl_img.place(x=-100, y=-70)
+        print('Side image')
 
         # Conecta ao banco de dados
+        print('DB Connection')
         self.conn = sqlite3.connect("database.db")
         self.cursor = self.conn.cursor()
+        print('DB Connection End')
 
         # Cria os widgets
         self.widgets()
 
         # Inicia a janela
+        print('Mainloop')
         self.root.mainloop()
     
     # Cria os widgets
@@ -57,6 +61,7 @@ class Login:
         # Cria o botão de cadastro
         self.btn_cadastro = Button(self.frame, text="Cadastro", font=("Century Gothic", 12), command=self.cadastro)
         self.btn_cadastro.pack()
+        print('End Widgets')
 
     # Função de login
     def login(self):
@@ -69,13 +74,15 @@ class Login:
             messagebox.showerror("Erro", "Preencha todos os campos!")
         else:
             # Verifica se o usuário existe
-            self.cursor.execute("SELECT * FROM usuarios WHERE usuario = ? AND senha = ?", (usuario, senha))
+            self.cursor.execute("SELECT * FROM associacao WHERE email_associacao = ? AND senha_associacao = ?", (usuario, senha))
             self.conn.commit()
             usuario = self.cursor.fetchone()
 
             # Se o usuário existir, entra no sistema
             if (usuario != None):
-                self.root.destroy()
+                print("user not null")
+                pass
+                #self.root.destroy()
                 # from home import Home
                 # Home()
             else:
@@ -104,7 +111,7 @@ class Login:
                 self.cursor.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", (usuario, senha))
                 self.conn.commit()
                 messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!")
-                self.root.destroy()
+                #self.root.destroy()
 
 # Inicia o programa
 if (__name__ == "__main__"):

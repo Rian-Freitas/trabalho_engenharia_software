@@ -9,7 +9,7 @@ CREATE TABLE artista (
     email_artista varchar(255) NOT NULL,
     senha_artista varchar(30) NOT NULL,
     cpf_artista varchar(15) NOT NULL,
-    associacao_cod_associacao double precision NOT NULL,
+    associacao_cod_associacao integer NOT NULL,
     CONSTRAINT artista_associacao FOREIGN KEY (associacao_cod_associacao)
     REFERENCES associacao (cod_associacao)
 );
@@ -47,7 +47,7 @@ CREATE TABLE obra (
 CREATE TABLE pagamento_rubrica (
     cod_pagamento integer NOT NULL,
     obra_cod_obra integer NOT NULL,
-    associacao_cod_associacao double precision NOT NULL,
+    associacao_cod_associacao integer NOT NULL, -- Change the data type to integer
     estabelecimento_cod_estabelecimento integer NOT NULL,
     data_pagamento date NOT NULL,
     valor_arrecadado float NOT NULL,
