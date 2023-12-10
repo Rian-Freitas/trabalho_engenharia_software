@@ -2,7 +2,6 @@ import sqlite3
 import tkinter as tk
 from tkinter import filedialog
 
-# Constante com o nome do banco de dados
 DB_FILE: str = "testbase2.db"
 
 
@@ -13,7 +12,7 @@ class MusicSystemFactory:
         return MusicSystemFacade()
 
 
-# Classe Facade para fornecer uma interface simplificada para o sistema
+# Classe Facade para fornecer uma interface para o sistema
 class MusicSystemFacade:
     def __init__(self):
         self.database: 'MusicDatabase' = MusicDatabase()
