@@ -59,9 +59,9 @@ class AdiantamentoApplication:
         except ValueError:
             self.label_mensagens.config(text="Valor digitado é inválido.")
 
-    def obter_max_valor_adiantamento(self, artist_email):
+    def obter_max_valor_adiantamento(self, email_artista):
         # Proxy (Lazy)
-        cursor = self.facade.executa_query("SELECT cod_artista FROM artista WHERE email_artista = ?", (artist_email,))
+        cursor = self.facade.executa_query("SELECT cod_artista FROM artista WHERE email_artista = ?", (email_artista,))
         id_artista = cursor.fetchone()
 
         if id_artista:
