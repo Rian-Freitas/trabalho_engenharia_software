@@ -26,7 +26,7 @@ class TestAdiantamentoApplication(unittest.TestCase):
             self.app.solicitar_requerimento()
 
         # Verificando se a mensagem é a esperada
-        mock_label_mensagens.config.assert_called_with(text="A solicitação foi recebido e será avaliada.")
+        mock_label_mensagens.config.assert_called_with(text="A solicitação foi recebida e será avaliada.")
 
     @patch.object(LazyProxyFacade, 'executa_query')
     def teste_valor_acima(self, mock_execute_query):
