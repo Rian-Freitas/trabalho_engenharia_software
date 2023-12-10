@@ -139,7 +139,7 @@ class AdiantamentoApplication:
 
 if __name__ == "__main__":
     # Configuração inicial da aplicação
-    facade = LazyProxyFacade('testbase2.db')
+    facade = LazyProxyFacade('database.db')
     root = tk.Tk()
     app = AdiantamentoApplication(root, facade)
     root.mainloop()
