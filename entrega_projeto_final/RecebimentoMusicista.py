@@ -8,23 +8,33 @@ from typing import Tuple, List
 DB_FILE: str = "testbase2.db"
 APP_TITLE: str = "Search Records"
 
+
 # Singleton
 class DatabaseSingleton:
+    """Classe Singleton para conexão com o banco de dados."""
+
     _instance = None
 
     def __new__(cls) -> 'DatabaseSingleton':
+        """Cria uma nova instância da classe ou retorna a instância existente."""
         if not cls._instance:
             cls._instance = super().__new__(cls)
             cls._instance.conn: sqlite3.Connection = sqlite3.connect(DB_FILE)
         return cls._instance
 
     def get_connection(self) -> sqlite3.Connection:
+        """Retorna a conexão com o banco de dados."""
         return self.conn
+
 
 # Factory
 class QueryFactory:
+    """Classe para criar consultas SQL."""
+
     @staticmethod
-    def create_query(association_code: str, start_date: str, end_date: str, condition_field: str, condition_value: str) -> Tuple[str, Tuple[str, str, str]]:
+    def create_query(association_code: str, start_date: str, end_date: str, condition_field: str,
+                     condition_value: str) -> Tuple[str, Tuple[str, str, str]]:
+        """Cria uma consulta SQL com base nos parâmetros fornecidos."""
         sql_query: str = f"""
         SELECT
             a.cod_artista,
@@ -41,23 +51,32 @@ class QueryFactory:
 
         return sql_query, (start_date, end_date, condition_value)
 
+
 # Proxy
 class LazyProxy:
+    """Classe Proxy que atrasa a criação da instância real."""
+
     def __init__(self, target_class: type) -> None:
         self.target_class: type = target_class
         self.instance: type = None
 
     def __getattr__(self, name: str) -> type:
+        """Obtém um atributo da instância real quando necessário."""
         if self.instance is None:
             self.instance = self.target_class()
         return getattr(self.instance, name)
 
+
 # Facade
 class DatabaseFacade:
+    """Classe Facade para interagir com o banco de dados."""
+
     def __init__(self, db_singleton: DatabaseSingleton) -> None:
         self.db_singleton: DatabaseSingleton = db_singleton
 
-    def search_records(self, association_code: str, start_date: str, end_date: str, result_text: tk.Text, sql_query: str, query_params: Tuple[str, str, str]) -> None:
+    def search_records(self, association_code: str, start_date: str, end_date: str, result_text: tk.Text,
+                       sql_query: str, query_params: Tuple[str, str, str]) -> None:
+        """Executa uma consulta no banco de dados e exibe os resultados em um widget de texto."""
         conn: sqlite3.Connection = self.db_singleton.get_connection()
         cursor: sqlite3.Cursor = conn.cursor()
 
@@ -68,9 +87,13 @@ class DatabaseFacade:
         for row in results:
             result_text.insert(tk.END, f"{row}\n")
 
+
 # Command
 class SearchRecordsCommand:
-    def __init__(self, db_facade: DatabaseFacade, association_code: str, start_date: str, end_date: str, result_text: tk.Text) -> None:
+    """Comando para executar uma busca de registros."""
+
+    def __init__(self, db_facade: DatabaseFacade, association_code: str, start_date: str, end_date: str,
+                 result_text: tk.Text) -> None:
         self.db_facade: DatabaseFacade = db_facade
         self.association_code: str = association_code
         self.start_date: str = start_date
@@ -78,10 +101,14 @@ class SearchRecordsCommand:
         self.result_text: tk.Text = result_text
 
     def execute(self, sql_query: str, query_params: Tuple[str, str, str]) -> None:
+        """Executa o comando de busca."""
         self.db_facade.search_records(self.association_code, self.start_date, self.end_date, self.result_text, sql_query, query_params)
+
 
 # Cliente
 class Client:
+    """Classe principal que inicia a aplicação."""
+
     def __init__(self) -> None:
         self.app: tk.Tk = tk.Tk()
         self.app.title(APP_TITLE)
@@ -94,7 +121,7 @@ class Client:
         # Cria instâncias usando Proxy e Singleton
         self.db_proxy: LazyProxy = LazyProxy(DatabaseSingleton)
         self.db_facade: DatabaseFacade = DatabaseFacade(self.db_proxy)
-        
+
         # Variável de seleção de consulta
         self.query_type_var: tk.StringVar = tk.StringVar()
         self.query_type_var.set("query1")  # Padrão para a primeira consulta
@@ -118,6 +145,7 @@ class Client:
         self.result_text.grid(row=4, column=0, columnspan=2, pady=10)
 
     def search_records(self) -> None:
+        """Executa uma busca de registros com base nos parâmetros fornecidos."""
         association_code: str = self.association_code_var.get()
         start_date: str = self.start_date_var.get()
         end_date: str = self.end_date_var.get()
@@ -125,15 +153,20 @@ class Client:
 
         selected_query: str = self.query_type_var.get()
         if selected_query == "query1":
-            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date, "a.associacao_cod_associacao", association_code)
+            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date,
+                                                               "a.associacao_cod_associacao", association_code)
         elif selected_query == "query2":
-            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date, "eo.artista_cod_artista", association_code)
+            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date,
+                                                               "eo.artista_cod_artista", association_code)
 
-        search_command: SearchRecordsCommand = SearchRecordsCommand(self.db_facade, association_code, start_date, end_date, self.result_text)
+        search_command: SearchRecordsCommand = SearchRecordsCommand(self.db_facade, association_code, start_date,
+                                                                    end_date, self.result_text)
         search_command.execute(sql_query, query_params)
 
     def run(self) -> None:
+        """Inicia a aplicação."""
         self.app.mainloop()
+
 
 # Execute o código do cliente
 if __name__ == "__main__":
