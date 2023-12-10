@@ -113,7 +113,7 @@ class TrocaAssociacaoApp:
 if __name__ == "__main__":   
     # Configuração inicial da aplicação
     email_artista = "artist1@email.com"
-    factory_conexao = conexaoFactory('testbase2.db')
+    factory_conexao = conexaoFactory('database.db')
     lazy_proxy = LazyProxy(FacadeDB, factory_conexao)
 
     root = tk.Tk()
