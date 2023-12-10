@@ -1,128 +1,141 @@
-# Constantes
-DB_FILE = "testbase2.db"
-APP_TITLE = "Search Records"
-
 import sqlite3
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk
 from datetime import datetime, timedelta
+from typing import Tuple, List
+
+# Constantes
+DB_FILE: str = "testbase2.db"
+APP_TITLE: str = "Search Records"
 
 # Singleton
-class SistemaRelatoriosSingleton:
+class DatabaseSingleton:
     _instance = None
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(SistemaRelatoriosSingleton, cls).__new__(cls)
-            cls._instance._conexao_bd = sqlite3.connect(":memory:")
-            cls._instance._criar_tabela_rendimentos()
+    def __new__(cls) -> 'DatabaseSingleton':
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+            cls._instance.conn: sqlite3.Connection = sqlite3.connect(DB_FILE)
         return cls._instance
 
-    def _criar_tabela_rendimentos(self):
-        cursor = self._conexao_bd.cursor()
-        cursor.execute('''CREATE TABLE rendimentos (
-                            musicista_id INTEGER,
-                            valor INTEGER,
-                            data DATE
-                         )''')
-        self._conexao_bd.commit()
+    def get_connection(self) -> sqlite3.Connection:
+        return self.conn
 
-    def adicionar_rendimento(self, musicista_id, valor):
-        data_atual = datetime.now().strftime("%Y-%m-%d")
-        cursor = self._conexao_bd.cursor()
-        cursor.execute("INSERT INTO rendimentos VALUES (?, ?, ?)", (musicista_id, valor, data_atual))
-        self._conexao_bd.commit()
+# Factory
+class QueryFactory:
+    @staticmethod
+    def create_query(association_code: str, start_date: str, end_date: str, condition_field: str, condition_value: str) -> Tuple[str, Tuple[str, str, str]]:
+        sql_query: str = f"""
+        SELECT
+            a.cod_artista,
+            a.nome_artista,
+            pr.data_pagamento,
+            SUM(pr.valor_arrecadado) AS total_valor_arrecadado
+        FROM pagamento_rubrica pr
+        JOIN relacao_artista_obra eo ON pr.obra_cod_obra = eo.obra_cod_obra
+        JOIN artista a ON eo.artista_cod_artista = a.cod_artista
+        WHERE pr.data_pagamento BETWEEN ? AND ?
+        AND {condition_field} = ?
+        GROUP BY a.cod_artista, a.nome_artista, pr.data_pagamento;
+        """
 
-    def obter_rendimentos_mes_atual(self, musicista_id):
-        cursor = self._conexao_bd.cursor()
-        mes_atual = datetime.now().month
-        cursor.execute("SELECT valor FROM rendimentos WHERE musicista_id = ? AND strftime('%m', data) = ?", (musicista_id, str(mes_atual)))
-        return [row[0] for row in cursor.fetchall()]
+        return sql_query, (start_date, end_date, condition_value)
 
 # Proxy
-class ProxyProtecaoRelatorio:
-    def __init__(self, servico_real):
-        self._servico_real = servico_real
+class LazyProxy:
+    def __init__(self, target_class: type) -> None:
+        self.target_class: type = target_class
+        self.instance: type = None
 
-    def solicitar_relatorio(self, musicista_id):
-        # Lógica para verificar permissões
-        if self._verificar_permissoes():
-            return self._servico_real.solicitar_relatorio(musicista_id)
-        else:
-            return "Acesso negado. Permissões insuficientes."
+    def __getattr__(self, name: str) -> type:
+        if self.instance is None:
+            self.instance = self.target_class()
+        return getattr(self.instance, name)
 
-    def _verificar_permissoes(self):
-        # Lógica para verificar permissões
-        return True
+# Facade
+class DatabaseFacade:
+    def __init__(self, db_singleton: DatabaseSingleton) -> None:
+        self.db_singleton: DatabaseSingleton = db_singleton
 
-# Chain of Responsibility
-class DescontoHandler:
-    def __init__(self, next_handler=None):
-        self._next_handler = next_handler
+    def search_records(self, association_code: str, start_date: str, end_date: str, result_text: tk.Text, sql_query: str, query_params: Tuple[str, str, str]) -> None:
+        conn: sqlite3.Connection = self.db_singleton.get_connection()
+        cursor: sqlite3.Cursor = conn.cursor()
 
-    def handle_request(self, rendimentos):
-        # Lógica para calcular descontos
-        desconto_ecad = 0.1 * sum(rendimentos)
-        desconto_associacao = 0.05 * sum(rendimentos)
-        return {
-            'Desconto ECAD': desconto_ecad,
-            'Desconto Associação': desconto_associacao
-        }
+        cursor.execute(sql_query, query_params)
 
-    def set_next_handler(self, next_handler):
-        self._next_handler = next_handler
+        results: List[Tuple] = cursor.fetchall()
 
-    def process_request(self, rendimentos):
-        descontos = self.handle_request(rendimentos)
-        if self._next_handler:
-            return {**descontos, **self._next_handler.process_request(rendimentos)}
-        return descontos
+        for row in results:
+            result_text.insert(tk.END, f"{row}\n")
+
+# Command
+class SearchRecordsCommand:
+    def __init__(self, db_facade: DatabaseFacade, association_code: str, start_date: str, end_date: str, result_text: tk.Text) -> None:
+        self.db_facade: DatabaseFacade = db_facade
+        self.association_code: str = association_code
+        self.start_date: str = start_date
+        self.end_date: str = end_date
+        self.result_text: tk.Text = result_text
+
+    def execute(self, sql_query: str, query_params: Tuple[str, str, str]) -> None:
+        self.db_facade.search_records(self.association_code, self.start_date, self.end_date, self.result_text, sql_query, query_params)
 
 # Cliente
-class InterfaceUsuario:
-    def __init__(self, sistema, proxy, chain_of_responsibility):
-        self.sistema = sistema
-        self.proxy = proxy
-        self.chain_of_responsibility = chain_of_responsibility
+class Client:
+    def __init__(self) -> None:
+        self.app: tk.Tk = tk.Tk()
+        self.app.title(APP_TITLE)
 
-        self.root = tk.Tk()
-        self.root.title("Relatório de Recebimento para Musicista")
+        # Variáveis de entrada
+        self.association_code_var: tk.StringVar = tk.StringVar()
+        self.start_date_var: tk.StringVar = tk.StringVar(value=(datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"))
+        self.end_date_var: tk.StringVar = tk.StringVar(value=datetime.now().strftime("%Y-%m-%d"))
 
-        self.nome_musicista = tk.Entry(self.root)
-        self.nome_musicista.grid(row=0, column=1, padx=10, pady=10)
-        self.label_nome = tk.Label(self.root, text="Nome do Musicista:")
-        self.label_nome.grid(row=0, column=0, padx=10, pady=10)
+        # Cria instâncias usando Proxy e Singleton
+        self.db_proxy: LazyProxy = LazyProxy(DatabaseSingleton)
+        self.db_facade: DatabaseFacade = DatabaseFacade(self.db_proxy)
+        
+        # Variável de seleção de consulta
+        self.query_type_var: tk.StringVar = tk.StringVar()
+        self.query_type_var.set("query1")  # Padrão para a primeira consulta
 
-        self.botao_gerar_relatorio = tk.Button(self.root, text="Gerar Relatório", command=self.gerar_relatorio)
-        self.botao_gerar_relatorio.grid(row=1, column=0, columnspan=2, pady=10)
+        # Componentes da GUI
+        ttk.Radiobutton(self.app, text="Associação", variable=self.query_type_var, value="query1").grid(row=3, column=0, padx=5, pady=5)
+        ttk.Radiobutton(self.app, text="Artista", variable=self.query_type_var, value="query2").grid(row=3, column=1, padx=5, pady=5)
 
-    def gerar_relatorio(self):
-        nome_musicista = self.nome_musicista.get()
-        if nome_musicista:
-            musicista_id = 1  # Supondo que o ID do musicista seja 1
-            rendimentos = self.sistema.obter_rendimentos_mes_atual(musicista_id)
+        ttk.Label(self.app, text="Code:").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Entry(self.app, textvariable=self.association_code_var).grid(row=0, column=1, padx=5, pady=5)
 
-            # Utilizando o Proxy para controlar o acesso ao serviço real
-            relatorio_proxy = ProxyProtecaoRelatorio(self.sistema)
-            relatorio = relatorio_proxy.solicitar_relatorio(musicista_id)
+        ttk.Label(self.app, text="Start Date:").grid(row=1, column=0, padx=5, pady=5)
+        ttk.Entry(self.app, textvariable=self.start_date_var).grid(row=1, column=1, padx=5, pady=5)
 
-            # Utilizando Chain of Responsibility para calcular descontos
-            descontos = self.chain_of_responsibility.process_request(rendimentos)
-            relatorio += "\nCálculos detalhados:\n"
-            for item, valor in descontos.items():
-                relatorio += f"{item}: {valor}\n"
+        ttk.Label(self.app, text="End Date:").grid(row=2, column=0, padx=5, pady=5)
+        ttk.Entry(self.app, textvariable=self.end_date_var).grid(row=2, column=1, padx=5, pady=5)
 
-            messagebox.showinfo("Relatório Gerado", relatorio)
-        else:
-            messagebox.showwarning("Aviso", "Por favor, insira o nome do musicista.")
+        ttk.Button(self.app, text="Search", command=self.search_records).grid(row=3, column=0, columnspan=2, pady=10)
 
-    def executar(self):
-        self.root.mainloop()
+        self.result_text: tk.Text = tk.Text(self.app, wrap=tk.WORD, width=50, height=10)
+        self.result_text.grid(row=4, column=0, columnspan=2, pady=10)
 
+    def search_records(self) -> None:
+        association_code: str = self.association_code_var.get()
+        start_date: str = self.start_date_var.get()
+        end_date: str = self.end_date_var.get()
+        self.result_text.delete(1.0, tk.END)
+
+        selected_query: str = self.query_type_var.get()
+        if selected_query == "query1":
+            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date, "a.associacao_cod_associacao", association_code)
+        elif selected_query == "query2":
+            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date, "eo.artista_cod_artista", association_code)
+
+        search_command: SearchRecordsCommand = SearchRecordsCommand(self.db_facade, association_code, start_date, end_date, self.result_text)
+        search_command.execute(sql_query, query_params)
+
+    def run(self) -> None:
+        self.app.mainloop()
+
+# Execute o código do cliente
 if __name__ == "__main__":
-    sistema_singleton = SistemaRelatoriosSingleton()
-    proxy = ProxyProtecaoRelatorio(sistema_singleton)
-    chain_of_responsibility = DescontoHandler()
-
-    interface = InterfaceUsuario(sistema_singleton, proxy, chain_of_responsibility)
-    interface.executar()
+    client: Client = Client()
+    client.run()
