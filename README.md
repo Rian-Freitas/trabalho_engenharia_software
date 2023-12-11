@@ -8,5 +8,5 @@ André Costa
 Rodrigo Prieto
 
 ## Utilização
-Para testagem de todo o sistema de login, rode o código `login.py`. Utilize uma conta existente no banco de dados (Você pode visualizar os dados utilizando o programa ![DB Browser](https://sqlitebrowser.org/)) ou crie novos dados facilmente.
+Para testagem de todo o sistema de login, rode o código `login.py`. Utilize uma conta existente no banco de dados (Você pode visualizar os dados utilizando o programa [DB Browser](https://sqlitebrowser.org/)) ou crie novos dados facilmente.
 
