@@ -11,7 +11,7 @@ class TestDatabaseInteraction(unittest.TestCase):
         db_interaction = DatabaseInteraction(mock_database)
 
         # Mock dos parâmetros da consulta
-        association_code = "123"
+        association_code = "1"
         start_date = "2023-01-01"
         end_date = "2023-01-31"
         result_text = Text()
@@ -39,8 +39,8 @@ class TestSearchRecords(unittest.TestCase):
         search_records = SearchRecords(mock_db_interaction, "123", "2023-01-01", "2023-01-31", Text())
 
         # Mock dos parâmetros da consulta
-        sql_query = "SELECT * FROM tabela;"
-        query_params = ("param1", "param2", "param3")
+        sql_query = "SELECT * FROM pagamento_rubrica;"
+        query_params = ("2023-01-01", "2023-01-31", "1")
 
         # Executa o método que queremos testar
         search_records.execute(sql_query, query_params)
