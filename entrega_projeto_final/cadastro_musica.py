@@ -41,8 +41,9 @@ class MusicSystemInteraction:
             with open(file_path, "r", encoding="utf-8") as file:
                 return file.read()
         except Exception as e:
-            print(f"Erro ao ler o arquivo: {e}")
-            return None
+            error_message = f"Erro ao ler o arquivo: {e}"
+            print(error_message)
+            return error_message
 
 
 # Classe para manipular o banco de dados
