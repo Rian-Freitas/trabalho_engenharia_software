@@ -4,7 +4,7 @@ from tkinter import ttk
 from typing import Tuple, Any
 
 # Constants
-DB_FILE = "testbase2.db"  # The database file name
+DB_FILE = "database.db"  # The database file name
 APP_TITLE = "Search Records"  # Title for the application window
 
 class DatabaseConnectionError(Exception):
@@ -82,7 +82,7 @@ class QueryFactory:
         return sql_query, (start_date, end_date, condition_value)
 
 
-class LazyProxy:
+class LazyProxySerie:
     """
     Lazy initialization proxy class.
 
@@ -183,7 +183,7 @@ class Client:
         self.end_date_var = tk.StringVar()
 
         # Initialize database connection
-        self.db_proxy = LazyProxy(DatabaseSingleton)
+        self.db_proxy = LazyProxySerie(DatabaseSingleton)
         self.db_facade = DatabaseFacade(self.db_proxy)
 
         # Initialize query selection variable

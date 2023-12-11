@@ -1,11 +1,14 @@
 from widget_factory import WidgetFactory
 from consumer import consumerPage
+from association_screen import ClientAssociacao
+from artista_screen import ClientArtista
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image
 from PIL import ImageTk
 import sqlite3
 import os
+
 
 class Database:
     _instance = None
@@ -16,7 +19,7 @@ class Database:
         return Database._instance
 
     def __init__(self):
-        self.conn = sqlite3.connect("entrega_projeto_final\database.db")
+        self.conn = sqlite3.connect("database.db")
         self.cursor = self.conn.cursor()
 
 
@@ -357,10 +360,11 @@ class Login:
     def __init__(self):
         self.root = WidgetFactory.create_window("Login", 925, 500)
 
-        self.img_logo, __ = WidgetFactory.create_image(self.root, "entrega_projeto_final/figs/ecad_login.png", (150, 150))
+        self.img_logo, __ = WidgetFactory.create_image(self.root, r"figs\ecad_login.png", (150, 150))
         self.img_logo.place(x=-10, y=350)
 
-        self.img_illustration, _ = WidgetFactory.create_image(self.root, "entrega_projeto_final/figs/illustration_login.png", (380, 380))
+        self.img_illustration, _ = WidgetFactory.create_image(self.root, r"figs\illustration_login.png", (380, 380))
+
         self.img_illustration.place(x=480, y=40)
 
         self.frame = WidgetFactory.create_frame(self.root, 350, 350)
@@ -412,6 +416,12 @@ class Login:
         if not empty_fields_handler.handle(info):
             if tipo_usuario == "Para consumidores":
                 consumerPage(info)
+
+            elif tipo_usuario == "Para associações":
+                ClientAssociacao()
+
+            elif tipo_usuario == "Para artistas":
+                ClientArtista(info)
 
 if __name__ == "__main__":
     login = Login()

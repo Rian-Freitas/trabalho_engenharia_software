@@ -16,8 +16,9 @@ class LazyProxy:
 
 # Classe para a aplicação principal
 class TrocaAssociacaoApp:
-    def __init__(self, root, email_artista, database_facade):
+    def __init__(self, root, info, database_facade):
         # Configurações iniciais da janela principal
+        self.info = info
         self.root = root
         self.root.title("Solicitar Troca de Associação")
 
@@ -36,30 +37,14 @@ class TrocaAssociacaoApp:
         self.root.configure(bg="white")
 
         # Atributos relacionados ao artista e à conexão com o banco de dados
-        self.email_artista = email_artista
         self.database_facade = database_facade
-        nome_artista = self.desc_nome_artista()
-        self.nome_artista.set(nome_artista)
         
         # Label de boas-vindas
-        label_boas_vindas = tk.Label(root, text="Bem vindo,", fg="#000000", bg="#fff", font=("Microsoft Yahei UI Light", 17, "bold"))
+        label_boas_vindas = tk.Label(root, text="Bem vindo", fg="#000000", bg="#fff", font=("Microsoft Yahei UI Light", 17, "bold"))
         label_boas_vindas.place(x=625, y=60)
-
-        # Label para nome do artista
-        self.nome_artista = tk.StringVar()
-        label_nome_artista = tk.Label(root, textvariable=self.nome_artista, fg="#000000", bg="#fff", font=("Microsoft Yahei UI Light", 17, "bold"))
-        label_nome_artista.place(x=650, y=100)
 
         # Criação dos widgets da interface gráfica
         self.cria_widgets()
-
-    def desc_nome_artista(self):
-        # Método para obter o nome do artista a partir do banco de dados
-        query = f"""
-            SELECT nome_artista FROM artista WHERE email_artista = '{self.email_artista}'
-        """
-        resultado = self.database_facade.executa_query(query)
-        return resultado
 
     def cria_widgets(self):
         # Criação dos widgets, como Combobox e Botão
@@ -72,7 +57,7 @@ class TrocaAssociacaoApp:
 
         self.associacao_combobox.place(x=625, y=250)
 
-        tk.Button(root, text="Solicitar Troca", command=self.solicitar_troca, fg="#FF0000", bg="#fff", font=("Microsoft Yahei UI Light", 15, "bold")).place(x=625, y=600)
+        tk.Button(self.root, text="Solicitar Troca", command=self.solicitar_troca, fg="#FF0000", bg="#fff", font=("Microsoft Yahei UI Light", 15, "bold")).place(x=625, y=600)
 
     def obter_nomes_associacoes(self):
         # Método para obter os nomes das associações disponíveis no banco de dados
@@ -82,7 +67,7 @@ class TrocaAssociacaoApp:
             WHERE cod_associacao != (
                 SELECT associacao_cod_associacao 
                 FROM artista 
-                WHERE email_artista = '{self.email_artista}'
+                WHERE email_artista = '{self.info[0]}'
             )
         """
         resultado = self.database_facade.executa_query(query)
@@ -104,7 +89,7 @@ class TrocaAssociacaoApp:
         query_atualizar_cod_associacao = f"""
             UPDATE artista 
             SET associacao_cod_associacao = {novo_cod_associacao} 
-            WHERE email_artista = '{self.email_artista}'
+            WHERE email_artista = '{self.info[0]}'
         """
         self.database_facade.executa_update(query_atualizar_cod_associacao)
 

@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from PIL import Image, ImageTk
 
 class AdiantamentoApplication:
-    def __init__(self, root, facade):
+    def __init__(self, root, facade, info):
+        self.info = info
         self.root = root
         self.root.title("Solicitar Adiantamento")
         self.facade = facade
@@ -22,11 +23,6 @@ class AdiantamentoApplication:
 
         self.root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
         self.root.configure(bg="white")
-
-        # Adiciona Logo
-        image = Image.open("figs/login.jpg")
-        image = image.resize((100, 100), Image.LANCZOS)
-        image = ImageTk.PhotoImage(image)
 
         # Valor máximo para retirada
         label_adiantamento_max = tk.Label(root, text="Valor Máximo para Adiantamento em Reais:", fg="#000000", bg="#fff", font=("Microsoft Yahei UI Light", 17, "bold"))
@@ -62,7 +58,7 @@ class AdiantamentoApplication:
         label_nome_artista.place(x=675, y=100)
 
         # Chamar a função para obter o valor máximo de adiantamento
-        email_artista = "artist1@email.com"
+        email_artista = self.info[0]
         valor_adiantamento_max = self.obter_max_valor_adiantamento(email_artista)
         self.valor_adiantamento_max.set(str(valor_adiantamento_max))
         nome_artista = self.desc_nome_artista(email_artista)
