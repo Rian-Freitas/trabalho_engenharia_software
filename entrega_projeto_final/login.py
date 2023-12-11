@@ -1,36 +1,46 @@
 from widget_factory import WidgetFactory
+from database import Database
 from consumer import consumerPage
 from tkinter import *
 from tkinter import messagebox
-from PIL import Image
-from PIL import ImageTk
-import sqlite3
-import os
-
-class Database:
-    _instance = None
-
-    def __new__(cls):
-        if Database._instance is None:
-            Database._instance = object.__new__(cls)
-        return Database._instance
-
-    def __init__(self):
-        self.conn = sqlite3.connect("entrega_projeto_final\database.db")
-        self.cursor = self.conn.cursor()
-
 
 class Handler:
-    def __init__(self, successor=None):
+    """
+    Classe abstrata que define a interface para os handlers.
+    Implementa o padrão de projeto Chain of Responsibility.
+
+    Atributos
+    ---------
+    _successor : Handler
+        Referência para o próximo handler na cadeia de handlers.
+    """
+    def __init__(self, successor = None) -> None:
         self._successor = successor
 
     def handle(self, fields: list) -> bool:
+        """
+        Método que define a interface para o tratamento de requisições.
+        Se o handler não puder tratar a requisição, ele a repassa para o próximo handler na cadeia.
+
+        Parâmetros
+        ----------
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se o handler tratou a requisição, False caso contrário.
+        """
         handled = self._handle(fields)
         if not handled and self._successor:
             return self._successor.handle(fields)
         return handled
         
     def _handle(self, fields: list) -> bool:
+        """
+        Método apenas para delimitar o fim da cadeia de handlers.
+        """
         return True
 
 # Classe a seguir foi feita a partir de TDD
@@ -48,8 +58,20 @@ class Handler:
     
 # Versão final da classe EmptyFieldsHandler
 class EmptyFieldsHandler(Handler):
-    
     def _handle(self, fiedls: list) -> bool:
+        """
+        Método que verifica se algum campo está vazio.
+
+        Parâmetros
+        ----------
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se algum campo estiver vazio, False caso contrário.
+        """
         if any(field == "" for field in fiedls):
             messagebox.showerror("Erro", "Preencha todos os campos!")
             return True
@@ -75,11 +97,36 @@ class EmptyFieldsHandler(Handler):
 
 # Versão final da classe UserExistsHandler
 class UserExistsHandler(Handler):
-    def __init__(self, successor=None, db=None, root=None):
+    def __init__(self, successor: Handler=None, db: Database=None, root: Tk=None) -> None:
+        """
+        Método construtor da classe UserExistsHandler.
+
+        Parâmetros
+        ----------
+        successor : Handler
+            Referência para o próximo handler na cadeia de handlers.
+        db : Database
+            Referência para o banco de dados.
+        root : Tk
+            Referência para a janela principal.
+        """
         super().__init__(successor)
         self._db = db
 
     def _handle(self, fields: list) -> bool:
+        """
+        Método que verifica se o usuário já está cadastrado.
+
+        Parâmetros
+        ----------
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se o usuário já estiver cadastrado, False caso contrário.
+        """
         self.table_names = {
             "Para artistas": "artista",
             "Para associações": "associacao",
@@ -102,12 +149,25 @@ class UserExistsHandler(Handler):
         return False
     
 class AssociationNotFoundHandler(Handler):
-    def __init__(self, successor=None, db=None, root=None):
+    def __init__(self, successor: Handler=None, db: Database=None, root: Tk=None) -> None:
         super().__init__(successor)
         self._db = db
         self._root = root
 
     def _handle(self, fields: list) -> bool:
+        """
+        Método que verifica se a associação existe.
+
+        Parâmetros
+        ----------
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se a associação não existir, False caso contrário.
+        """
         if fields[5] != "Para artistas": return False
 
         self._db.cursor.execute(f"SELECT * FROM associacao WHERE nome_associacao = ?", (fields[4],))
@@ -120,19 +180,32 @@ class AssociationNotFoundHandler(Handler):
         return False
     
 class PasswordsDontMatchHandler(Handler):
-    def __init__(self, successor=None, db=None, root=None):
+    def __init__(self, successor: Handler=None, db: Database=None, root: Tk=None) -> None:
         super().__init__(successor)
         self._db = db
         self._root = root
 
     def _handle(self, fields: list) -> bool:
+        """
+        Método que verifica se as senhas coincidem.
+
+        Parâmetros
+        ----------
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se as senhas não coincidirem, False caso contrário.
+        """
         if fields[2] != fields[6]:
             messagebox.showerror("Erro", "As senhas não coincidem!")
             return True
         return False
 
 class LoginHandler(Handler):
-    def __init__(self, successor=None, db=None, root=None):
+    def __init__(self, successor: Handler=None, db: Database=None, root: Tk=None) -> None:
         super().__init__(successor)
         self._db = db
         self._root = root
@@ -144,6 +217,20 @@ class LoginHandler(Handler):
         }
 
     def _handle(self, fields: list) -> bool:
+        """
+        Método que verifica se o usuário e a senha estão corretos.
+
+        Parâmetros
+        ----------
+
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se o usuário ou a senha estiverem incorretos, False caso contrário.
+        """
         self.table_names = {
             "Para artistas": "artista",
             "Para associações": "associacao",
@@ -166,12 +253,25 @@ class LoginHandler(Handler):
         return False
     
 class SignUpHandler(Handler):
-    def __init__(self, successor=None, db=None, root=None):
+    def __init__(self, successor: Handler=None, db: Database=None, root: Tk=None) -> None:
         super().__init__(successor)
         self._db = db
         self._root = root
 
-    def _handle(self, fields: list):
+    def _handle(self, fields: list) -> bool:
+        """
+        Método que cadastra o usuário no banco de dados.
+
+        Parâmetros
+        ----------
+        fields : list
+            Lista com os campos preenchidos pelo usuário.
+
+        Retorno
+        -------
+        bool
+            True se o usuário for cadastrado com sucesso, False caso contrário.
+        """
         self.table_names = {
             "Para artistas": "artista",
             "Para associações": "associacao",
@@ -208,7 +308,13 @@ class SignUpHandler(Handler):
         return False
     
 class SignUp:
-    def __init__(self):
+    """
+    Classe que define a interface gráfica para o cadastro de usuários.
+    """
+    def __init__(self) -> None:
+        """
+        Método construtor da classe SignUp.
+        """
         self.root_2 = WidgetFactory.create_popup("Cadastro", 525, 250)
 
         self.frame_2 = WidgetFactory.create_frame(self.root_2, 350, 600)
@@ -226,7 +332,10 @@ class SignUp:
 
         self.root_2.mainloop()
 
-    def select_option(self):
+    def select_option(self) -> None:
+        """
+        Método que seleciona o tipo de usuário.
+        """
         self.option = self.option_menu_2.cget("text")
         if self.option == "Para artistas":
             self.artist()
@@ -235,7 +344,10 @@ class SignUp:
         else:
             self.consumer()
 
-    def artist(self):
+    def artist(self) -> None:
+        """
+        Método que define a interface gráfica para o cadastro de artistas.
+        """
         self.root_2.geometry("525x600+300+200")
         self.option_menu_2.destroy()
         self.button_2.destroy()
@@ -267,7 +379,10 @@ class SignUp:
         self.button_3 = WidgetFactory.create_button(self.frame_2, "Cadastrar", self.sign_up)
         self.button_3.place(x=120, y=500)
 
-    def association(self):
+    def association(self) -> None:
+        """
+        Método que define a interface gráfica para o cadastro de associações.
+        """
         self.root_2.geometry("525x540+300+200")
         self.option_menu_2.destroy()
         self.button_2.destroy()
@@ -298,7 +413,10 @@ class SignUp:
         self.button_3 = WidgetFactory.create_button(self.frame_2, "Cadastrar", self.sign_up)
         self.button_3.place(x=120, y=440)
 
-    def consumer(self):
+    def consumer(self) -> None:
+        """
+        Método que define a interface gráfica para o cadastro de consumidores.
+        """
         self.root_2.geometry("525x540+300+200")
         self.option_menu_2.destroy()
         self.button_2.destroy()
@@ -328,7 +446,11 @@ class SignUp:
         self.button_3 = WidgetFactory.create_button(self.frame_2, "Cadastrar", self.sign_up)
         self.button_3.place(x=120, y=440)
 
-    def sign_up(self):
+    def sign_up(self) -> None:
+        """
+        Método que compilada as informações do usuário, passa para o 
+        primeiro handler da cadeia de handlers e inicia o cadastro.
+        """
         name = self.name.get()
         email = self.email.get()
         senha = self.senha.get()
@@ -353,8 +475,15 @@ class SignUp:
         association_not_found_handler._successor = sign_up_handler
 
         empty_fields_handler.handle(info)
+
 class Login:
-    def __init__(self):
+    """
+    Classe que define a interface gráfica para o login.
+    """
+    def __init__(self) -> None:
+        """
+        Método construtor da classe Login.
+        """
         self.root = WidgetFactory.create_window("Login", 925, 500)
 
         self.img_logo, __ = WidgetFactory.create_image(self.root, "entrega_projeto_final/figs/ecad_login.png", (150, 150))
@@ -396,7 +525,11 @@ class Login:
 
         self.root.mainloop()
 
-    def login(self):
+    def login(self) -> None:
+        """
+        Método que compilada as informações do usuário, passa para o
+        primeiro handler da cadeia de handlers e inicia o login.
+        """
         usuario = self.user.get()
         senha = self.password.get()
         tipo_usuario = self.option_menu.cget("text")
