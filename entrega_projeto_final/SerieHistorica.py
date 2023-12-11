@@ -13,6 +13,14 @@ class DatabaseConnectionError(Exception):
         self.message = message
         super().__init__(self.message)
 
+#Initial version of DatabaseSingleton class
+
+#class DatabaseSingleton:
+#   instance.conn = sqlite3.connect(DB_FILE)
+    # def get_connection(self) -> sqlite3.Connection:
+    #     """Returns the established database connection."""
+    #     return self.conn
+
 
 class DatabaseSingleton:
     """
@@ -39,6 +47,25 @@ class DatabaseSingleton:
     def get_connection(self) -> sqlite3.Connection:
         """Returns the established database connection."""
         return self.conn
+
+#Initial version of QueryFactory:
+#class Query:
+# sql_query = f"""
+#         SELECT
+#             a.cod_artista,
+#             a.nome_artista,
+#             pr.data_pagamento,
+#             SUM(pr.valor_arrecadado)  AS total_valor_liquido
+#         FROM pagamento_rubrica pr
+#         JOIN relacao_artista_obra eo ON pr.obra_cod_obra = eo.obra_cod_obra
+#         JOIN artista a ON eo.artista_cod_artista = a.cod_artista
+#         WHERE pr.data_pagamento BETWEEN ? AND ?
+#         AND a.cod_artista = ?
+#         GROUP BY a.cod_artista, a.nome_artista, pr.data_pagamento, eo.porcentagem_diretos;
+#         """
+#         return sql_query
+#       
+
 
 class QueryFactory:
     """
