@@ -3,23 +3,23 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 
 # Constante com o nome do banco de dados
-DB_FILE: str = "testbase2.db"
+DB_FILE: str = "database.db"
 
 
 # Classe Factory para criar instâncias do sistema
-class MusicSystemFactory:
+class MusicSystem:
     """Factory para criar instâncias do sistema de música."""
     @staticmethod
-    def create_music_system() -> 'MusicSystemFacade':
-        """Cria uma instância de MusicSystemFacade."""
-        return MusicSystemFacade()
+    def create_music_system() -> 'MusicSystemInteraction':
+        """Cria uma instância de MusicSystemInteraction."""
+        return MusicSystemInteraction()
 
 
-# Classe Facade para fornecer uma interface simplificada para o sistema
-class MusicSystemFacade:
+# Classe Facade para fornecer uma interface para o sistema
+class MusicSystemInteraction:
     """Fachada para interagir com o sistema de música."""
     def __init__(self):
-        self.database: 'MusicDatabase' = MusicDatabase()
+        self.database: 'DatabaseInteraction' = DatabaseInteraction()
         self.certification_service: 'CertificationService' = CertificationService()
 
     def register_music(self, cod_artista: int, file_path: str) -> str:
@@ -46,7 +46,7 @@ class MusicSystemFacade:
 
 
 # Classe para manipular o banco de dados
-class MusicDatabase:
+class DatabaseInteraction:
     """Classe para interagir com o banco de dados de músicas."""
     def __init__(self):
         self.connection: 'sqlite3.Connection' = sqlite3.connect(DB_FILE)
@@ -109,7 +109,7 @@ class MusicRegistrationGUI:
     def register_music(self) -> None:
         """Registra uma música."""
         cod_artista: int = 1  # Suponha que o ID do musicista seja 1 (pode ser obtido de forma dinâmica)
-        system: 'MusicSystemFacade' = MusicSystemFactory.create_music_system()
+        system: 'MusicSystemInteraction' = MusicSystem.create_music_system()
         result_message: str = system.register_music(cod_artista, self.file_path)
         messagebox.showinfo("Resultado", result_message)
 
