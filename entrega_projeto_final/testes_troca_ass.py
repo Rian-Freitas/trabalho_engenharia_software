@@ -1,50 +1,54 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 from backend_troca_ass import conexaoFactory, FacadeDB
+
+class TestConexaoFactory(unittest.TestCase):
+    def test_singleton_instance(self):
+        # Testa se duas instâncias compartilham a mesma conexão ao banco de dados
+        factory1 = conexaoFactory("database.db")
+        factory2 = conexaoFactory("database.db")
+        self.assertEqual(factory1, factory2)
+
+    def test_get_conexao(self):
+        # Testa se o método get_conexao retorna a conexão correta
+        factory = conexaoFactory("database.db")
+        conexao = factory.get_conexao()
+        self.assertIsNotNone(conexao)
 
 class TestFacadeDB(unittest.TestCase):
     def setUp(self):
-        # Configuração inicial para cada teste
-        # Cria um mock para a fábrica de conexões e instancia o objeto FacadeDB para teste
-        self.factory_mock = MagicMock(spec=conexaoFactory)
+        # Configuração inicial para os testes
+        self.factory_mock = Mock()
         self.facade = FacadeDB(self.factory_mock)
 
     def test_executa_query(self):
-        # Teste para o método executa_query
-        query = "SELECT * FROM tabela"
-
-        # Criação de mocks para objetos simulados de cursor e conexão
-        cursor_mock = MagicMock()
-        conexao_mock = MagicMock()
-        conexao_mock.cursor.return_value = cursor_mock
+        # Testa se o método executa_query executa a query corretamente
+        query = "SELECT * FROM test_table"
+        conexao_mock = Mock()
+        cursor_mock = Mock()
         self.factory_mock.get_conexao.return_value = conexao_mock
+        conexao_mock.cursor.return_value = cursor_mock
 
-        # Chamada ao método sendo testado
-        self.facade.executa_query(query)
+        result = self.facade.executa_query(query)
 
-        # Verificações de chamadas esperadas
+        self.assertEqual(result, cursor_mock.fetchall())
         conexao_mock.cursor.assert_called_once()
         cursor_mock.execute.assert_called_once_with(query)
-        cursor_mock.fetchall.assert_called_once()
+        cursor_mock.close.assert_called_once()
 
     def test_executa_update(self):
-        # Teste para o método executa_update
-        query = "UPDATE tabela SET coluna = valor"
-
-        # Criação de mocks para objetos simulados de cursor e conexão
-        cursor_mock = MagicMock()
-        conexao_mock = MagicMock()
-        conexao_mock.cursor.return_value = cursor_mock
+        # Testa se o método executa_update executa o update corretamente
+        query = "UPDATE test_table SET column = value"
+        conexao_mock = Mock()
+        cursor_mock = Mock()
         self.factory_mock.get_conexao.return_value = conexao_mock
+        conexao_mock.cursor.return_value = cursor_mock
 
-        # Chamada ao método sendo testado
         self.facade.executa_update(query)
 
-        # Verificações de chamadas esperadas
-        conexao_mock.cursor.assert_called_once()
-        cursor_mock.execute.assert_called_once_with(query)
         conexao_mock.commit.assert_called_once()
+        cursor_mock.execute.assert_called_once_with(query)
+        cursor_mock.close.assert_called_once()
 
-if __name__ == "__main__":
-    # Executa os testes quando o script é executado diretamente
+if __name__ == '__main__':
     unittest.main()
