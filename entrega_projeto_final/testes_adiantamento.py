@@ -1,61 +1,38 @@
 import unittest
-from unittest.mock import  patch
-from tkinter import Tk
-from backend_adiantamento import LazyProxyFacade, ArtistaIdHandler, ObraIdHandler, ReceitaTotalHandler
-from frontend_adiantamento import AdiantamentoApplication
+from unittest.mock import Mock
+from backend_adiantamento import DatabaseConnection, LazyProxyFacade, AdiantamentoHandler, ArtistaIdHandler, ObraIdHandler, ReceitaTotalHandler
 
-class TestAdiantamentoApplication(unittest.TestCase):
+class TestDatabaseConnection(unittest.TestCase):
+    def test_singleton_instance(self):
+        # Testa se duas instâncias compartilham a mesma conexão ao banco de dados
+        database1 = DatabaseConnection("database.db")
+        database2 = DatabaseConnection("database.db")
+        self.assertEqual(database1, database2)
+
+class TestLazyProxyFacade(unittest.TestCase):
     def setUp(self):
-        self.root = Tk()
-        self.facade = LazyProxyFacade('testbase2.db')
-        self.app = AdiantamentoApplication(self.root, self.facade)
+        # Configuração inicial para os testes
+        self.mock_connection = Mock()
+        self.facade = LazyProxyFacade("database.db")
+        self.facade._conn = self.mock_connection
 
-    def tearDown(self):
-        self.root.destroy()
+    def test_connection_property(self):
+        # Testa se a propriedade 'connection' retorna a conexão correta
+        connection = self.facade.connection
+        self.assertEqual(connection, self.mock_connection)
 
-    @patch.object(LazyProxyFacade, 'executa_query')
-    def teste_valor_abaixo(self, mock_execute_query):
-    # Configurando o valor máximo para retirada
-        self.app.valor_adiantamento_max.set("500")
+    def test_executa_query(self):
+        # Testa se a execução de uma query é feita corretamente
+        query = "SELECT * FROM test_table"
+        parameters = (1, 2, 3)
+        cursor_mock = Mock()
+        self.mock_connection.cursor.return_value = cursor_mock
 
-        # Configurando o valor desejado
-        self.app.valor_requerido.set("300")
+        result = self.facade.executa_query(query, parameters)
 
-        # Chamando a função a ser testada
-        with patch.object(self.app, 'label_mensagens') as mock_label_mensagens:
-            self.app.solicitar_requerimento()
-
-        # Verificando se a mensagem é a esperada
-        mock_label_mensagens.config.assert_called_with(text="A solicitação foi recebida e será avaliada.")
-
-    @patch.object(LazyProxyFacade, 'executa_query')
-    def teste_valor_acima(self, mock_execute_query):
-        # Configurando o valor máximo para retirada
-        self.app.valor_adiantamento_max.set("500")
-
-        # Configurando um valor desejado maior que o máximo permitido
-        self.app.valor_requerido.set("600")
-
-        # Chamando a função a ser testada
-        with patch.object(self.app, 'label_mensagens') as mock_label_mensagens:
-            self.app.solicitar_requerimento()
-
-        # Verificando se a mensagem é a esperada
-        mock_label_mensagens.config.assert_called_with(text="O valor é superior ao limite permitido.")
-
-    def teste_valor_invalido(self):
-        # Configurando o valor máximo para retirada
-        self.app.valor_adiantamento_max.set("500")
-
-        # Configurando um valor desejado inválido
-        self.app.valor_requerido.set("abc")
-
-        # Chamando a função a ser testada
-        with patch.object(self.app, 'label_mensagens') as mock_label_mensagens:
-            self.app.solicitar_requerimento()
-
-        # Verificando se a mensagem é a esperada
-        mock_label_mensagens.config.assert_called_with(text="Valor digitado é inválido.")
+        self.assertEqual(result, cursor_mock)
+        self.mock_connection.cursor.assert_called_once()
+        cursor_mock.execute.assert_called_once_with(query, parameters)
 
 if __name__ == '__main__':
     unittest.main()

@@ -4,7 +4,7 @@ from tkinter import ttk
 from typing import Tuple, Any
 
 # Constants
-DB_FILE = "testbase2.db"  # The database file name
+DB_FILE = "database.db"  # The database file name
 APP_TITLE = "Search Records"  # Title for the application window
 
 class DatabaseConnectionError(Exception):
@@ -12,6 +12,14 @@ class DatabaseConnectionError(Exception):
     def __init__(self, message="Error connecting to the database"):
         self.message = message
         super().__init__(self.message)
+
+#Initial version of DatabaseSingleton class
+
+#class DatabaseSingleton:
+#   instance.conn = sqlite3.connect(DB_FILE)
+    # def get_connection(self) -> sqlite3.Connection:
+    #     """Returns the established database connection."""
+    #     return self.conn
 
 
 class DatabaseSingleton:
@@ -39,6 +47,25 @@ class DatabaseSingleton:
     def get_connection(self) -> sqlite3.Connection:
         """Returns the established database connection."""
         return self.conn
+
+#Initial version of QueryFactory:
+#class Query:
+# sql_query = f"""
+#         SELECT
+#             a.cod_artista,
+#             a.nome_artista,
+#             pr.data_pagamento,
+#             SUM(pr.valor_arrecadado)  AS total_valor_liquido
+#         FROM pagamento_rubrica pr
+#         JOIN relacao_artista_obra eo ON pr.obra_cod_obra = eo.obra_cod_obra
+#         JOIN artista a ON eo.artista_cod_artista = a.cod_artista
+#         WHERE pr.data_pagamento BETWEEN ? AND ?
+#         AND a.cod_artista = ?
+#         GROUP BY a.cod_artista, a.nome_artista, pr.data_pagamento, eo.porcentagem_diretos;
+#         """
+#         return sql_query
+#       
+
 
 class QueryFactory:
     """
@@ -82,7 +109,7 @@ class QueryFactory:
         return sql_query, (start_date, end_date, condition_value)
 
 
-class LazyProxy:
+class LazyProxySerie:
     """
     Lazy initialization proxy class.
 
@@ -183,7 +210,7 @@ class Client:
         self.end_date_var = tk.StringVar()
 
         # Initialize database connection
-        self.db_proxy = LazyProxy(DatabaseSingleton)
+        self.db_proxy = LazyProxySerie(DatabaseSingleton)
         self.db_facade = DatabaseFacade(self.db_proxy)
 
         # Initialize query selection variable
