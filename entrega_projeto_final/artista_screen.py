@@ -5,7 +5,8 @@ from backend_adiantamento import LazyProxyFacade
 from frontend_adiantamento import AdiantamentoApplication
 from frontend_troca_ass import TrocaAssociacaoApp, LazyProxy
 from backend_troca_ass import conexaoFactory, FacadeDB
-
+from cadastro_musica import MusicRegistrationGUI
+from recebimento_musicista import Client
 
 APP_TITLE = "Página da Associação"  # Change to your desired title
 DB_FILE = "database.db"
@@ -43,11 +44,16 @@ class ClientArtista:
         """
         Set up the GUI components of the application.
         """
+        
+        ttk.Button(self.app, text="Open Adiantamento Screen", command=lambda: self.open_adiantamento_screen(self.info)).grid(row=5, column=0, columnspan=2, pady=5)
+        ttk.Button(self.app, text="Open Troca Screen", command=lambda: self.open_troca_screen(self.info)).grid(row=6, column=0, columnspan=2, pady=5)
+        
+        ttk.Button(self.app, text="Cadastrar música", command=lambda: self.open_cadastro_musica()).grid(row=6, column=1, columnspan=2, pady=5)
+        ttk.Button(self.app, text="Abrir Recebimento", command=lambda: self.open_recebimento()).grid(row=5, column=1, columnspan=2, pady=5)
+
+
+
         # Radio buttons for query selection
-        ttk.Button(self.app, text="Open Adiantamento Screen", command=lambda: self.open_adiantamento_screen(self.info)).grid(row=5, column=0, columnspan=2, pady=10)
-        ttk.Button(self.app, text="Open Troca Screen", command=lambda: self.open_troca_screen(self.info)).grid(row=6, column=0, columnspan=2, pady=10)
-
-
         ttk.Radiobutton(self.app, text="Associação", variable=self.query_type_var, value="query1").grid(row=3, column=0, padx=5, pady=5)
         ttk.Radiobutton(self.app, text="Artista", variable=self.query_type_var, value="query2").grid(row=3, column=1, padx=5, pady=5)
 
@@ -79,7 +85,14 @@ class ClientArtista:
         factory_conexao = conexaoFactory('database.db')
         lazy_proxy = LazyProxy(FacadeDB, factory_conexao)
         TrocaAssociacaoApp(root, info, lazy_proxy)
+    
+    def open_cadastro_musica(self):
+        root: tk.Tk = tk.Toplevel(self.app)
+        app: 'MusicRegistrationGUI' = MusicRegistrationGUI(root)
+        root.mainloop()
 
+    def open_recebimento(self):
+        client: Client = Client()
 
     def search_records(self):
         """
