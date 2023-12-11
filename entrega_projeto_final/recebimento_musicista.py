@@ -5,17 +5,17 @@ from datetime import datetime, timedelta
 from typing import Tuple, List
 
 # Constantes
-DB_FILE: str = "testbase2.db"
+DB_FILE: str = "database.db"
 APP_TITLE: str = "Search Records"
 
 
 # Singleton
-class DatabaseSingleton:
-    """Classe Singleton para conexão com o banco de dados."""
+class Database:
+    """Classe para conexão com o banco de dados."""
 
     _instance = None
 
-    def __new__(cls) -> 'DatabaseSingleton':
+    def __new__(cls) -> 'Database':
         """Cria uma nova instância da classe ou retorna a instância existente."""
         if not cls._instance:
             cls._instance = super().__new__(cls)
@@ -28,7 +28,7 @@ class DatabaseSingleton:
 
 
 # Factory
-class QueryFactory:
+class Query:
     """Classe para criar consultas SQL."""
 
     @staticmethod
@@ -68,16 +68,16 @@ class LazyProxy:
 
 
 # Facade
-class DatabaseFacade:
-    """Classe Facade para interagir com o banco de dados."""
+class DatabaseInteraction:
+    """Classe para interagir com o banco de dados."""
 
-    def __init__(self, db_singleton: DatabaseSingleton) -> None:
-        self.db_singleton: DatabaseSingleton = db_singleton
+    def __init__(self, database: Database) -> None:
+        self.database: Database = database
 
     def search_records(self, association_code: str, start_date: str, end_date: str, result_text: tk.Text,
                        sql_query: str, query_params: Tuple[str, str, str]) -> None:
         """Executa uma consulta no banco de dados e exibe os resultados em um widget de texto."""
-        conn: sqlite3.Connection = self.db_singleton.get_connection()
+        conn: sqlite3.Connection = self.database.get_connection()
         cursor: sqlite3.Cursor = conn.cursor()
 
         cursor.execute(sql_query, query_params)
@@ -88,13 +88,13 @@ class DatabaseFacade:
             result_text.insert(tk.END, f"{row}\n")
 
 
-# Command
-class SearchRecordsCommand:
+# Commands
+class SearchRecords:
     """Comando para executar uma busca de registros."""
 
-    def __init__(self, db_facade: DatabaseFacade, association_code: str, start_date: str, end_date: str,
+    def __init__(self, db_facade: DatabaseInteraction, association_code: str, start_date: str, end_date: str,
                  result_text: tk.Text) -> None:
-        self.db_facade: DatabaseFacade = db_facade
+        self.db_facade: DatabaseInteraction = db_facade
         self.association_code: str = association_code
         self.start_date: str = start_date
         self.end_date: str = end_date
@@ -119,8 +119,8 @@ class Client:
         self.end_date_var: tk.StringVar = tk.StringVar(value=datetime.now().strftime("%Y-%m-%d"))
 
         # Cria instâncias usando Proxy e Singleton
-        self.db_proxy: LazyProxy = LazyProxy(DatabaseSingleton)
-        self.db_facade: DatabaseFacade = DatabaseFacade(self.db_proxy)
+        self.db_proxy: LazyProxy = LazyProxy(Database)
+        self.db_facade: DatabaseInteraction = DatabaseInteraction(self.db_proxy)
 
         # Variável de seleção de consulta
         self.query_type_var: tk.StringVar = tk.StringVar()
@@ -153,13 +153,13 @@ class Client:
 
         selected_query: str = self.query_type_var.get()
         if selected_query == "query1":
-            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date,
+            sql_query, query_params = Query.create_query(association_code, start_date, end_date,
                                                                "a.associacao_cod_associacao", association_code)
         elif selected_query == "query2":
-            sql_query, query_params = QueryFactory.create_query(association_code, start_date, end_date,
+            sql_query, query_params = Query.create_query(association_code, start_date, end_date,
                                                                "eo.artista_cod_artista", association_code)
 
-        search_command: SearchRecordsCommand = SearchRecordsCommand(self.db_facade, association_code, start_date,
+        search_command: SearchRecords = SearchRecords(self.db_facade, association_code, start_date,
                                                                     end_date, self.result_text)
         search_command.execute(sql_query, query_params)
 
