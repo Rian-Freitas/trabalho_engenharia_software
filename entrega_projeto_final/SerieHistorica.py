@@ -7,18 +7,33 @@ from typing import Tuple, Any
 DB_FILE = "testbase2.db"  # The database file name
 APP_TITLE = "Search Records"  # Title for the application window
 
+class DatabaseConnectionError(Exception):
+    """Exception raised for errors in the database connection."""
+    def __init__(self, message="Error connecting to the database"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class DatabaseSingleton:
     """
     Singleton class to ensure only one database connection is established.
 
     This class uses the Singleton design pattern to create a single instance of the database connection.
+
+    >>> db_instance = DatabaseSingleton()
+    >>> isinstance(db_instance.get_connection(), sqlite3.Connection)
+    True
+    
     """
     _instance = None
 
     def __new__(cls, *args, **kwargs) -> "DatabaseSingleton":
         if not cls._instance:
             cls._instance = super().__new__(cls, *args, **kwargs)
-            cls._instance.conn = sqlite3.connect(DB_FILE)
+            try:
+                cls._instance.conn = sqlite3.connect(DB_FILE)
+            except sqlite3.Error as e:
+                raise DatabaseConnectionError(f"Database error: {e}")
         return cls._instance
 
     def get_connection(self) -> sqlite3.Connection:
@@ -29,7 +44,10 @@ class QueryFactory:
     """
     Factory class for creating SQL queries.
 
-    This class uses the Factory pattern to create different types of SQL queries.
+    >>> QueryFactory.create_query_artist_deduction('1', '2023-01-01', '2023-12-31', 'a.associacao_cod_associacao', '1')
+    ('\n        SELECT\n            a.cod_artista,\n            a.nome_artista,\n            pr.data_pagamento,\n            SUM(pr.valor_arrecadado) * 0.9 * (eo.porcentagem_diretos / 100.0) AS total_valor_liquido\n        FROM pagamento_rubrica pr\n        JOIN relacao_artista_obra eo ON pr.obra_cod_obra = eo.obra_cod_obra\n        JOIN artista a ON eo.artista_cod_artista = a.cod_artista\n        WHERE pr.data_pagamento BETWEEN ? AND ?\n        AND a.associacao_cod_associacao = ?\n        GROUP BY a.cod_artista, a.nome_artista, pr.data_pagamento, eo.porcentagem_diretos;\n        ', ('2023-01-01', '2023-12-31', '1'))
+    >>> QueryFactory.create_query_artist_deduction('2', '2022-01-01', '2023-12-31', 'a.associacao_cod_associacao', '1')
+    ('\n        SELECT\n            a.cod_artista,\n            a.nome_artista,\n            pr.data_pagamento,\n            SUM(pr.valor_arrecadado) * 0.9 * (eo.porcentagem_diretos / 100.0) AS total_valor_liquido\n        FROM pagamento_rubrica pr\n        JOIN relacao_artista_obra eo ON pr.obra_cod_obra = eo.obra_cod_obra\n        JOIN artista a ON eo.artista_cod_artista = a.cod_artista\n        WHERE pr.data_pagamento BETWEEN ? AND ?\n        AND a.associacao_cod_associacao = ?\n        GROUP BY a.cod_artista, a.nome_artista, pr.data_pagamento, eo.porcentagem_diretos;\n        ', ('2022-01-01', '2023-12-31', '1'))
     """
 
     @staticmethod
@@ -227,5 +245,9 @@ class Client:
         self.app.mainloop()
 
 if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+
     client = Client()
     client.run()
+    
