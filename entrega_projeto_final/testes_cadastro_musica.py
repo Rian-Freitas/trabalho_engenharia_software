@@ -14,16 +14,25 @@ class TestMusicSystemInteraction(unittest.TestCase):
         mock_database_instance = mock_database.return_value
         mock_certification_service_instance = mock_certification_service.return_value
 
-        # simulação do comportamento das dependências
+        # Simulação do comportamento das dependências
         mock_database_instance.check_uniqueness.return_value = True
-        mock_certification_service_instance.issue_certificate.return_value = "Certificate123"
+        mock_certification_service_instance.issue_certificate.return_value = "Certificado"
 
-        # Teste do processo de registro
-        result = self.music_system.register_music(1, "path/to/music.txt")
+        # Testes do processo de registro
+        result1 = self.music_system.register_music(1, "obra/ligia_teste.txt")
+        result2 = self.music_system.register_music(1, "obra/tive_razao_teste_1.txt")
 
         # Asserts
-        self.assertEqual(result, "Música registrada com sucesso!\nCertificate123")
-        mock_database_instance.check_uniqueness.assert_called_once_with("content_of_the_file")
+        self.assertEqual(result1, "Música registrada com sucesso!\nCertificado")
+        mock_database_instance.check_uniqueness.assert_called_once_with("Eu nunca sonhei com você\nNunca fui ao cinema\n\
+                                                                        Não gosto de samba, não vou a Ipanema\n\
+                                                                        Não gosto de chuva, nem gosto de Sol")
+        mock_certification_service_instance.issue_certificate.assert_called_once_with(1)
+        self.assertEqual(result2, "Música registrada com sucesso!\nCertificado")
+        mock_database_instance.check_uniqueness.assert_called_once_with("Tive razão, posso falar\n\
+                                                                        Não foi legal, não pegou bem\n\
+                                                                        Que vontade de chorar, dói\n\
+                                                                        Em pensar que ela não vem, só dói")
         mock_certification_service_instance.issue_certificate.assert_called_once_with(1)
 
     @patch('cadastro_musica.DatabaseInteraction')
@@ -35,11 +44,14 @@ class TestMusicSystemInteraction(unittest.TestCase):
         mock_database_instance.check_uniqueness.return_value = False
 
         # Teste do processo de registro para uma música não única
-        result = self.music_system.register_music(1, "path/to/music.txt")
+        result3 = self.music_system.register_music(2, "obra/tive_razao_teste_2.txt")
 
         # Asserts
-        self.assertEqual(result, "Esta música já foi registrada anteriormente. Não exclusiva")
-        mock_database_instance.check_uniqueness.assert_called_once_with("content_of_the_file")
+        self.assertEqual(result3, "Esta música já foi registrada anteriormente. Não exclusiva")
+        mock_database_instance.check_uniqueness.assert_called_once_with("Tive razão, posso falar\n\
+                                                                        Não foi legal, não pegou bem\n\
+                                                                        Que vontade de chorar, dói\n\
+                                                                        Em pensar que ela não vem, só dói")
 
     def test_read_file(self):
         # Mock da função open
@@ -49,11 +61,13 @@ class TestMusicSystemInteraction(unittest.TestCase):
             mock_open.return_value = mock_file
 
             # Teste do método read_file
-            result = self.music_system._read_file("path/to/music.txt")
+            result = self.music_system._read_file("obra/ligia_teste.txt")
 
             # Asserts
-            self.assertEqual(result, "content_of_the_file")
-            mock_open.assert_called_once_with("path/to/music.txt", "r", encoding="utf-8")
+            self.assertEqual(result, "Eu nunca sonhei com você\nNunca fui ao cinema\n\
+                                      Não gosto de samba, não vou a Ipanema\n\
+                                      Não gosto de chuva, nem gosto de Sol")
+            mock_open.assert_called_once_with("obra/ligia_teste.txt", "r", encoding="utf-8")
 
 
 class TestDatabaseInteraction(unittest.TestCase):
@@ -66,33 +80,47 @@ class TestDatabaseInteraction(unittest.TestCase):
         self.database.cursor.fetchone.return_value = None
 
         # Teste do método check_uniqueness para uma composição única
-        result = self.database.check_uniqueness("unique_content")
+        result = self.database.check_uniqueness("Eu nunca sonhei com você\nNunca fui ao cinema\n\
+                                                Não gosto de samba, não vou a Ipanema\n\
+                                                Não gosto de chuva, nem gosto de Sol")
 
         # Asserts
         self.assertTrue(result)
-        self.database.cursor.execute.assert_called_once_with("SELECT * FROM obra WHERE content = ?", ("unique_content",))
+        self.database.cursor.execute.assert_called_once_with("SELECT * FROM obra WHERE composicao = ?", ("unique_content",))
 
     def test_check_uniqueness_not_unique(self):
         # Mock do método execute
         self.database.cursor.execute = MagicMock()
-        self.database.cursor.fetchone.return_value = ("existing_content",)
+        self.database.cursor.fetchone.return_value = ("Tive razão, posso falar\n\
+                                                        Não foi legal, não pegou bem\n\
+                                                        Que vontade de chorar, dói\n\
+                                                        Em pensar que ela não vem, só dói",)
 
         # Teste do método check_uniqueness para uma composição não única
-        result = self.database.check_uniqueness("existing_content")
+        result = self.database.check_uniqueness("Tive razão, posso falar\n\
+                                                Não foi legal, não pegou bem\n\
+                                                Que vontade de chorar, dói\n\
+                                                Em pensar que ela não vem, só dói")
 
         # Asserts
         self.assertFalse(result)
-        self.database.cursor.execute.assert_called_once_with("SELECT * FROM obra WHERE content = ?", ("existing_content",))
+        self.database.cursor.execute.assert_called_once_with("SELECT * FROM obra WHERE composicao = ?", ("Tive razão, posso falar\n\
+                                                                        Não foi legal, não pegou bem\n\
+                                                                        Que vontade de chorar, dói\n\
+                                                                        Em pensar que ela não vem, só dói",))
 
     def test_register_music(self):
         # Mock do método execute
         self.database.cursor.execute = MagicMock()
 
         # Teste do método register_music
-        self.database.register_music("new_content")
-
+        self.database.register_music("Eu nunca sonhei com você\nNunca fui ao cinema\n\
+                                                Não gosto de samba, não vou a Ipanema\n\
+                                                Não gosto de chuva, nem gosto de Sol")
         # Asserts
-        self.database.cursor.execute.assert_called_once_with("INSERT INTO obra (content) VALUES (?)", ("new_content",))
+        self.database.cursor.execute.assert_called_once_with("INSERT INTO obra (composicao) VALUES (?)", ("Eu nunca sonhei com você\nNunca fui ao cinema\n\
+                                                Não gosto de samba, não vou a Ipanema\n\
+                                                Não gosto de chuva, nem gosto de Sol"),)
 
 
 if __name__ == '__main__':
