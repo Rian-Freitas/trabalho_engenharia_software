@@ -19,8 +19,8 @@ class TestMusicSystemInteraction(unittest.TestCase):
         mock_certification_service_instance.issue_certificate.return_value = "Certificado"
 
         # Testes do processo de registro
-        result1 = self.music_system.register_music(1, "obra/ligia_teste.txt")
-        result2 = self.music_system.register_music(1, "obra/tive_razao_teste_1.txt")
+        result1 = self.music_system.register_music(1, "obras/ligia_teste.txt")
+        result2 = self.music_system.register_music(1, "obras/tive_razao_teste_1.txt")
 
         # Asserts
         self.assertEqual(result1, "Música registrada com sucesso!\nCertificado")
@@ -44,7 +44,7 @@ class TestMusicSystemInteraction(unittest.TestCase):
         mock_database_instance.check_uniqueness.return_value = False
 
         # Teste do processo de registro para uma música não única
-        result3 = self.music_system.register_music(2, "obra/tive_razao_teste_2.txt")
+        result3 = self.music_system.register_music(2, "obras/tive_razao_teste_2.txt")
 
         # Asserts
         self.assertEqual(result3, "Esta música já foi registrada anteriormente. Não exclusiva")
@@ -61,7 +61,7 @@ class TestMusicSystemInteraction(unittest.TestCase):
             mock_open.return_value = mock_file
 
             # Teste do método read_file
-            result = self.music_system._read_file("obra/ligia_teste.txt")
+            result = self.music_system._read_file("obras/ligia_teste.txt")
 
             # Asserts
             self.assertEqual(result, "Eu nunca sonhei com você\nNunca fui ao cinema\n\
